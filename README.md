@@ -1,6 +1,5 @@
 # Deployment tools of BSC
 
-
 ## Installation
 Before proceeding to the next steps, please ensure that the following packages and softwares are well installed in your local machine: 
 
@@ -19,7 +18,7 @@ Before proceeding to the next steps, please ensure that the following packages a
 ## Quick Start
 1. Clone this repository
 ```bash
-git clone https://github.com/bnb-chain/node-deploy.git
+git clone [https://github.com/bnb-chain/node-deploy.git](https://github.com/bnb-chain/node-deploy.git)
 ```
 
 2. For the first time, please execute the following command
@@ -41,6 +40,7 @@ cp .env.example .env
 ```
 
 Then set deployment-specific values in the local, ignored `.env` file. You can also modify the following files:
+Before starting the cluster, rotate any deployment credentials or key material that was previously committed to Git.
 
 - `config.toml`
 - `genesis/genesis-template.json`
@@ -97,7 +97,7 @@ go build
 
 ## Docker Version (Recommended)
 
-To run a fully containerized, isolated local BSC cluster without installing dependencies on your host machine, use the provided `Makefile` which handles the 2-phase orchestration automatically.
+To run a fully containerized, isolated local BSC cluster without installing dependencies on your host machine, use the provided `Makefile` which handles the 3-phase orchestration automatically.
 
 ### Architecture Workflow
 
@@ -145,31 +145,3 @@ sequenceDiagram
     Toolbox-->>Makefile: Exit (registration tasks submitted)
 
     Note over User,Docker: Local BSC Cluster active with registered validators
-```
-
-### Quick Commands
-
-- **`make cluster-up`**: One-click start. It runs the initialization phase, starts the isolated nodes via Docker Compose, and then automatically handles validator registration on StakeHub.
-- **`make cluster-down`**: Safely stop all running nodes.
-- **`make cluster-logs`**: Stream aggregated, color-coded logs from all running nodes.
-- **`make cluster-restart`**: Fast restart the cluster (nodes only). Use this if you manually modified `.local/nodeX/config.toml` and want to apply changes without wiping the blockchain data.
-- **`make cluster-clean`**: **WARNING**. Wipes all generated data (`.local/`), genesis files, and temporary yaml configs. Use this to reset the chain back to block zero.
-
-### Node Ports Mapping
-
-Each node runs identically on port `8545` internally. Host mapping is structured sequentially:
-
-| Node | RPC (HTTP/WS) | Metrics (Prometheus) | pprof (Debug) | P2P (TCP/UDP) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Node 0** | 8545 | 6060 | 7060 | 30311 |
-| **Node 1** | 8547 | 6062 | 7062 | 30312 |
-| **Node 2** | 8549 | 6064 | 7064 | 30313 |
-| **Node 3** | 8551 | 6066 | 7066 | 30314 |
-
-For example, to check the block height of Node 1:
-`curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://127.0.0.1:8547`
-
-### Logging
-
-By default, nodes output all their logs directly to the Docker logging driver (STDOUT). You can view them using:
-`docker logs -f bsc-node-0`
