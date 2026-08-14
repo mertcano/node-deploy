@@ -16,17 +16,20 @@ Before proceeding to the next steps, please ensure that the following packages a
 
 
 ## Quick Start
+
 1. Clone this repository
+
 ```bash
-git clone [https://github.com/bnb-chain/node-deploy.git](https://github.com/bnb-chain/node-deploy.git)
+git clone https://github.com/bnb-chain/node-deploy.git
 ```
 
-2. For the first time, please execute the following command
+1. For the first time, please execute the following command
+
 ```bash
 pip3 install -r requirements.txt
 ```
 
-3. build `create-validator`
+1. build `create-validator`
 
 ```bash
 # This tool is used to register the validators into StakeHub.
@@ -34,7 +37,8 @@ cd create-validator
 go build
 ```
 
-4. Configure the cluster
+1. Configure the cluster
+
 ```bash
 cp .env.example .env
 ```
@@ -46,8 +50,9 @@ Before starting the cluster, rotate any deployment credentials or key material t
 - `genesis/genesis-template.json`
 - `genesis/scripts/init_holders.template`
 
-5. Setup all nodes.
+1. Setup all nodes.
 two different ways, choose as you like.
+
 ```bash
 bash -x ./bsc_cluster.sh reset # will reset the cluster and start
 # The 'vidx' parameter is optional. If provided, its value must be in the range [0, ${BSC_CLUSTER_SIZE}). If omitted, it affects all clusters.
@@ -56,7 +61,7 @@ bash -x ./bsc_cluster.sh start [vidx] # only start the cluster
 bash -x ./bsc_cluster.sh restart [vidx] # start the cluster after stopping it
 ```
 
-6. Setup a full node.
+1. Setup a full node.
 If you want to run a full node to test snap/full syncing, you can run:
 
 > Attention: it relies on the validator cluster, so you should set up validators by `bsc_cluster.sh` firstly.
@@ -83,6 +88,7 @@ You can see the logs in `.local/fullnode`.
 Generally, you need to wait for the validator to produce a certain amount of blocks before starting the full/snap syncing test, such as 1000 blocks.
 
 ## Background transactions
+
 ```bash
 ## normal tx
 cd txbot
@@ -145,3 +151,31 @@ sequenceDiagram
     Toolbox-->>Makefile: Exit (registration tasks submitted)
 
     Note over User,Docker: Local BSC Cluster active with registered validators
+```
+
+### Quick Commands
+
+- **`make cluster-up`**: One-click start. It runs the initialization phase, starts the isolated nodes via Docker Compose, and then automatically handles validator registration on StakeHub.
+- **`make cluster-down`**: Safely stop all running nodes.
+- **`make cluster-logs`**: Stream aggregated, color-coded logs from all running nodes.
+- **`make cluster-restart`**: Fast restart the cluster (nodes only). Use this if you manually modified `.local/nodeX/config.toml` and want to apply changes without wiping the blockchain data.
+- **`make cluster-clean`**: **WARNING**. Wipes all generated data (`.local/`), genesis files, and temporary yaml configs. Use this to reset the chain back to block zero.
+
+### Node Ports Mapping
+
+Each node runs identically on port `8545` internally. Host mapping is structured sequentially:
+
+| Node | RPC (HTTP/WS) | Metrics (Prometheus) | pprof (Debug) | P2P (TCP/UDP) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Node 0** | 8545 | 6060 | 7060 | 30311 |
+| **Node 1** | 8547 | 6062 | 7062 | 30312 |
+| **Node 2** | 8549 | 6064 | 7064 | 30313 |
+| **Node 3** | 8551 | 6066 | 7066 | 30314 |
+
+For example, to check the block height of Node 1:
+`curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' [http://127.0.0.1:8547](http://127.0.0.1:8547)`
+
+### Logging
+
+By default, nodes output all their logs directly to the Docker logging driver (STDOUT). You can view them using:
+`docker logs -f bsc-node-0`
