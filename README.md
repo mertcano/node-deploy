@@ -36,13 +36,15 @@ go build
 ```
 
 4. Configure the cluster
+```bash
+cp .env.example .env
 ```
-  You can configure the cluster by modifying the following files:
-   - `config.toml`
-   - `genesis/genesis-template.json`
-   - `genesis/scripts/init_holders.template`
-   - `.env`
-```
+
+Then set deployment-specific values in the local, ignored `.env` file. You can also modify the following files:
+
+- `config.toml`
+- `genesis/genesis-template.json`
+- `genesis/scripts/init_holders.template`
 
 5. Setup all nodes.
 two different ways, choose as you like.
